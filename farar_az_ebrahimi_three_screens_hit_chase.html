@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#17151f">
+<title>فرار از ابراهیمی | نینجای بنفش</title>
+<style>
+:root{--bg:#17151f;--panel:#24212f;--panel2:#302b40;--purple:#9b72ff;--purple2:#6d28d9;--text:#f4f0ff;--muted:#b6afc8;--line:#494158;--danger:#ff5478}
+*{box-sizing:border-box}
+html{min-height:100%;background:var(--bg)}
+body{margin:0;min-height:100vh;padding:14px;display:grid;place-items:center;background:radial-gradient(ellipse at 50% -15%,#403453 0,#211d2b 45%,#121118 100%);font-family:Tahoma,Arial,sans-serif;color:var(--text)}
+button,select{font:inherit}
+.wrap{width:min(1000px,100%)}
+.panel{background:linear-gradient(145deg,#292534,#1e1b27);border:1px solid #514765;border-radius:22px;padding:clamp(13px,3vw,24px);box-shadow:0 18px 55px #08070c99,inset 0 1px #ffffff0d}
+h1{margin:0 0 8px;text-align:center;font-size:clamp(25px,5vw,38px);color:#c8b2ff;text-shadow:0 0 22px #9b72ff55}
+.sub{text-align:center;color:var(--muted);line-height:1.9;margin:0 0 20px;font-size:14px}
+.row,.controls,.stats{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap;margin:12px 0}
+label{font-weight:bold;color:#e5ddf6}
+select,button{border-radius:12px;padding:12px 15px}
+select{background:#373143;border:1px solid #5b506e;color:#fff;min-width:112px}
+button{border:1px solid #a58aff;background:linear-gradient(135deg,#9c78ff,#6d28d9);color:#fff;font-weight:bold;box-shadow:0 4px 0 #4c1d95,0 8px 18px #6d28d933;cursor:pointer;touch-action:manipulation;transition:transform .12s,filter .12s,box-shadow .12s}
+button:hover{filter:brightness(1.08)}button:active{transform:translateY(3px);box-shadow:0 1px 0 #4c1d95}
+button.secondary{background:linear-gradient(135deg,#55515f,#34313e);border-color:#716a80;box-shadow:0 4px 0 #24212d,0 8px 18px #0002}
+button:focus-visible,select:focus-visible{outline:3px solid #d7c8ff;outline-offset:3px}
+#gameScreen,#selectScreen{display:none}
+.stepbar{display:flex;justify-content:center;gap:8px;margin:0 0 18px}
+.step{padding:7px 12px;border-radius:999px;background:#302b3c;border:1px solid #514765;color:#b6afc8;font-size:12px}
+.step.active{background:#4a356f;border-color:#b99aff;color:#fff;box-shadow:0 0 18px #9b72ff33}
+.select-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:stretch}
+.preview-stage{position:relative;min-height:280px;display:grid;place-items:center;overflow:hidden;border-radius:18px;border:1px solid #69568a;background:radial-gradient(ellipse at 50% 42%,#45335f 0,#252031 52%,#15131d 100%);perspective:900px}
+.preview-stage:before{content:"";position:absolute;inset:0;background:linear-gradient(#9b72ff0d 1px,transparent 1px),linear-gradient(90deg,#9b72ff0d 1px,transparent 1px);background-size:24px 24px;transform:perspective(450px) rotateX(18deg) scale(1.4);transform-origin:center bottom}
+.preview-stage:after{content:"";position:absolute;left:0;right:0;height:3px;top:-5px;background:#d9c6ff;box-shadow:0 0 12px #b99aff,0 0 30px #9b72ff;animation:scan 2.6s linear infinite;z-index:3;pointer-events:none}
+@keyframes scan{0%{top:-5px}100%{top:calc(100% + 5px)}}
+.avatar3d{position:relative;z-index:2;width:150px;height:190px;display:grid;place-items:center;font-size:112px;filter:drop-shadow(0 12px 14px #0009);transform-style:preserve-3d;animation:float3d 3s ease-in-out infinite;transition:filter .25s,transform .25s}\n#previewCanvas{position:absolute;inset:0;z-index:2;width:100%;height:100%;display:block}
+.avatar3d:before{content:"";position:absolute;bottom:5px;width:112px;height:24px;border-radius:50%;background:#9b72ff55;filter:blur(12px);transform:rotateX(65deg) translateZ(-20px)}
+@keyframes float3d{0%,100%{transform:rotateY(-12deg) rotateX(2deg) translateY(0)}50%{transform:rotateY(12deg) rotateX(-3deg) translateY(-9px)}}
+.preview-name{position:absolute;bottom:12px;z-index:4;background:#15121ddd;border:1px solid #75618f;border-radius:999px;padding:7px 14px;font-size:13px;color:#e5d9ff;box-shadow:0 0 18px #9b72ff22}
+.preview-caption{color:#b6afc8;font-size:12px;text-align:center;line-height:1.8;margin:10px 0 0}
+.choice-box{border:1px solid #494158;background:#211e2b;border-radius:16px;padding:14px;margin-bottom:12px}
+.choice-box h3{margin:0 0 10px;color:#d5c5ff;font-size:15px}
+.choice-buttons{display:flex;gap:8px;flex-wrap:wrap}
+.choice-card{flex:1;min-width:92px;padding:10px 8px;background:#302b3c;border:1px solid #514765;border-radius:12px;text-align:center;cursor:pointer;color:#e9e2f7}
+.choice-card .emoji{display:block;font-size:26px;margin-bottom:5px}
+.choice-card small{display:block;color:#b6afc8;font-size:11px}
+.choice-card.selected{border-color:#c1a7ff;background:linear-gradient(145deg,#49366a,#2d263e);box-shadow:0 0 0 1px #9b72ff55,0 0 20px #9b72ff22}
+.navrow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+@media(max-width:640px){.select-grid{grid-template-columns:1fr}.preview-stage{min-height:220px}.avatar3d{height:150px;font-size:88px}.choice-card{min-width:78px}.choice-card small{font-size:10px}}
+.stats{justify-content:space-around;background:#302b3c;border:1px solid #514765;border-radius:14px;padding:10px;font-weight:bold;color:#e6dcff}
+.stats span{white-space:nowrap}
+canvas{display:block;width:100%;height:auto;border:2px solid #65547e;border-radius:16px;background:#201c2a;box-shadow:inset 0 0 30px #6b587622;touch-action:manipulation}
+.controls button{min-width:112px;font-size:16px}
+.hint{text-align:center;font-size:13px;color:#b6afc8;line-height:1.9;margin:13px 0 0}
+.message{text-align:center;font-weight:bold;color:#d0baff;min-height:25px;margin:12px 0 0}
+.tiny{text-align:center;font-size:12px;color:#8f879f;margin:7px 0 0}
+.settings{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.pill{border:1px solid #514765;border-radius:999px;background:#302b3c;color:#cfc4e6;padding:6px 10px;font-size:12px}
+#overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:#100d18b8;backdrop-filter:blur(5px);z-index:10;padding:20px}
+#overlay.show{display:flex}
+.modal{width:min(440px,100%);background:linear-gradient(145deg,#302b3c,#1e1b27);border:1px solid #75618f;border-radius:22px;padding:24px;text-align:center;box-shadow:0 20px 80px #0009}
+.modal h2{color:#d5c5ff;margin:0 0 8px}.modal p{color:#c4bbd4;line-height:1.8}
+#hurtFlash{position:fixed;inset:0;pointer-events:none;z-index:8;opacity:0;background:radial-gradient(ellipse at center,transparent 35%,#ff315e99 100%);border:0 solid #ff466a}
+@media(max-width:520px){body{padding:8px}.panel{border-radius:17px}.stats{gap:8px;font-size:13px}.controls button{flex:1;min-width:90px;padding:12px 8px}.sub{font-size:13px}}
+@media(prefers-reduced-motion:reduce){button{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<section class="panel" id="home">
+  <div class="stepbar"><span class="step active">۱ · تنظیمات</span><span class="step">۲ · انتخاب کاراکتر</span><span class="step">۳ · بازی</span></div>
+  <h1>🏃 فرار از ابراهیمی</h1>
+  <p class="sub">از دست یکی از سه تعقیب‌کننده فرار کن! با نینجای بنفش از کیف‌ها و کتاب‌ها بپر و برای عبور از دیوارهای پایین‌آویز سُر بخور.<br>افکت‌های نوری، ذرات، لرزش و افزایش تدریجی سختی فعال‌اند.</p>
+  <div class="row">
+    <label for="lives">تعداد جان:</label>
+    <select id="lives"><option value="1">۱ جان</option><option value="2" selected>۲ جان</option><option value="3">۳ جان</option><option value="5">۵ جان</option></select>
+    <label for="difficulty">شروع سختی:</label>
+    <select id="difficulty"><option value="easy">آسون</option><option value="normal" selected>معمولی</option><option value="hard">سخت</option></select>
+  </div>
+  <div class="row"><button id="start">مرحله بعد: انتخاب کاراکتر ←</button><button class="secondary" id="resetBest">پاک‌کردن رکورد</button></div>
+  <p class="hint">ابتدا جان و سختی را انتخاب کن، سپس در صفحه بعد کاراکترها را انتخاب کن.</p>
+  <div class="settings"><span class="pill">🟣 نینجای بنفش</span><span class="pill">✨ افکت کامل</span><span class="pill">📈 سختی تدریجی</span><span class="pill">💾 ذخیره رکورد</span></div>
+</section>
+
+<section class="panel" id="selectScreen">
+  <div style="display:none" aria-hidden="true"><select id="playerChoice"><option value="ninja" selected>نینجا</option><option value="student">دانش‌آموز</option><option value="robot">ربات</option></select><select id="chaserChoice"><option value="ebrahimi" selected>ابراهیمی</option><option value="trump">ترامپ</option><option value="pezeshkian">پزشکیان</option></select></div>
+  <div class="stepbar"><span class="step">۱ · تنظیمات</span><span class="step active">۲ · انتخاب کاراکتر</span><span class="step">۳ · بازی</span></div>
+  <h1>🎭 انتخاب کاراکتر</h1>
+  <p class="sub">شخصیتت را انتخاب کن؛ مدل سه‌بعدی بالای صفحه زنده تغییر می‌کند و با اسکن بنفش نمایش داده می‌شود.</p>
+  <div class="select-grid">
+    <div>
+      <div class="preview-stage" aria-label="پیش‌نمایش سه‌بعدی کاراکتر">
+        <canvas id="previewCanvas" width="900" height="380" aria-label="پیش‌نمایش واقعی کاراکتر و تعقیب‌کننده"></canvas>
+        <div class="preview-name" id="previewName">نینجای بنفش</div>
+      </div>
+      <p class="preview-caption">پیش‌نمایش سه‌بعدی نمایشی · اسکن نوری فعال</p>
+    </div>
+    <div>
+      <div class="choice-box">
+        <h3>کاراکتر خودت</h3>
+        <div class="choice-buttons">
+          <button type="button" class="choice-card selected" data-player="ninja">نینجا<small>بنفش</small></button>
+          <button type="button" class="choice-card" data-player="student">دانش‌آموز<small>مدرسه‌ای</small></button>
+          <button type="button" class="choice-card" data-player="robot">ربات<small>فناوری</small></button>
+        </div>
+      </div>
+      <div class="choice-box">
+        <h3>چه کسی دنبالت کند؟</h3>
+        <div class="choice-buttons">
+          <button type="button" class="choice-card selected" data-chaser="ebrahimi">ابراهیمی<small>معلم</small></button>
+          <button type="button" class="choice-card" data-chaser="trump">ترامپ<small>کت سرمه‌ای</small></button>
+          <button type="button" class="choice-card" data-chaser="pezeshkian">پزشکیان<small>ریش خاکستری</small></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="navrow">
+    <button id="backSettings" class="secondary">→ بازگشت به تنظیمات</button>
+    <button id="playNow">شروع فرار! ▶</button>
+  </div>
+</section>
+
+<section class="panel" id="gameScreen">
+  <div class="stepbar"><span class="step">۱ · تنظیمات</span><span class="step">۲ · انتخاب کاراکتر</span><span class="step active">۳ · بازی</span></div>
+  <div class="stats"><span>⭐ امتیاز: <b id="score">۰</b></span><span>🏆 رکورد: <b id="best">۰</b></span><span>💜 جان: <b id="life">۲</b></span><span>⚡ سطح: <b id="level">۱</b></span><span>🏃 فاصله: <b id="gap">۱۰۰٪</b></span></div>
+  <canvas id="game" width="900" height="380" aria-label="صفحه بازی فرار از مدرسه"></canvas>
+  <div class="controls"><button id="jump">⬆ پرش</button><button id="duck" class="secondary">⬇ سُر خوردن</button><button id="pause" class="secondary">Ⅱ توقف</button><button id="menu" class="secondary">منو</button></div>
+  <div id="message" class="message">حواست به زمین و بالای سرت باشه!</div>
+  <p class="tiny" id="chaserHint">تعقیب‌کننده دنبالت است! مانع‌ها را رد کن و فاصله‌ات را حفظ کن.</p>
+</section>
+</div>
+<div id="hurtFlash"></div>
+<div id="overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal"><h2 id="modalTitle">بازی متوقف شد</h2><p id="modalText">هر وقت آماده بودی ادامه بده.</p><div class="row"><button id="resume">ادامه بازی ▶</button><button id="restart" class="secondary">شروع دوباره</button><button id="overlayMenu" class="secondary">منو</button></div></div>
+</div>
+<script>
+(() => {
+'use strict';
+const $ = id => document.getElementById(id);
+const home=$('home'), selectScreen=$('selectScreen'), screen=$('gameScreen'), canvas=$('game'); let ctx=canvas.getContext('2d');
+const W=900,H=380,ground=300;
+const BEST_KEY='fararEbrahimiNinjaBestV4';
+let best=0;
+try { best=Number(localStorage.getItem(BEST_KEY))||0; } catch(e) { best=0; }
+$('best').textContent=fa(best);
+function fa(n){return Math.floor(n).toLocaleString('fa-IR');}
+const state={
+  active:false,paused:false,ended:false,raf:0,last:0,clock:0,score:0,lives:2,
+  speed:5.1,baseSpeed:5.1,spawn:60,obs:[],particles:[],stars:[],duckUntil:0,
+  shake:0,flash:0,invuln:0,level:1,hitLock:0,world:0,scoreFloat:0,chaseGap:140
+};
+const player={x:118,y:ground-68,w:43,h:68,vy:0,grounded:true,duck:false,runPhase:0,landSquash:0};
+function safeBestWrite(){try{localStorage.setItem(BEST_KEY,String(best));}catch(e){}}
+function clearLoop(){if(state.raf){cancelAnimationFrame(state.raf);state.raf=0;}}
+function resetGame(){
+  state.score=0;state.lives=Number($('lives').value)||2;
+  state.baseSpeed=({easy:4.4,normal:5.2,hard:6.4})[$('difficulty').value]||5.2;
+  state.speed=state.baseSpeed;state.spawn=48;state.obs=[];state.particles=[];state.clock=0;state.world=0;
+  state.shake=0;state.flash=0;state.invuln=0;state.hitLock=0;state.level=1;state.scoreFloat=0;
+  state.duckUntil=0;state.chaseGap=140;state.active=true;state.paused=false;state.ended=false;
+  player.x=118;player.h=68;player.w=43;player.y=ground-player.h;player.vy=0;player.grounded=true;player.duck=false;player.runPhase=0;player.landSquash=0;
+  $('score').textContent=fa(0);$('life').textContent=fa(state.lives);$('level').textContent='۱';$('gap').textContent='۱۰۰٪';
+  $('message').textContent='بپر و سُر بخور؛ مراقب دیوارها باش!';
+  $('overlay').classList.remove('show');$('hurtFlash').style.opacity='0';
+}
+function showSelection(){
+  home.style.display='none';screen.style.display='none';selectScreen.style.display='block';
+  $('overlay').classList.remove('show');updatePreview();
+}
+function start(){
+  clearLoop();resetGame();home.style.display='none';selectScreen.style.display='none';screen.style.display='block';
+  $('message').textContent='بپر و سُر بخور؛ مراقب '+chaserName()+' باش!';$('chaserHint').textContent=chaserName()+' دنبالت است! مانع‌ها را رد کن و فاصله‌ات را حفظ کن.';
+  state.last=performance.now();state.raf=requestAnimationFrame(loop);
+}
+function toMenu(){
+  clearLoop();state.active=false;state.paused=false;state.ended=false;
+  $('overlay').classList.remove('show');screen.style.display='none';selectScreen.style.display='none';home.style.display='block';
+}
+function chaserName(){
+  return ({ebrahimi:'آقای ابراهیمی',trump:'ترامپ',pezeshkian:'پزشکیان'})[$('chaserChoice').value]||'تعقیب‌کننده';
+}
+function updatePreview(){
+  const p=$('playerChoice').value;
+  const names={ninja:'نینجای بنفش',student:'دانش‌آموز',robot:'ربات کوچولو'};
+  $('previewName').textContent=(names[p]||names.ninja)+' در برابر '+chaserName();
+  document.querySelectorAll('[data-player]').forEach(b=>b.classList.toggle('selected',b.dataset.player===p));
+  document.querySelectorAll('[data-chaser]').forEach(b=>b.classList.toggle('selected',b.dataset.chaser===$('chaserChoice').value));
+  renderCharacterPreview();
+}
+function renderCharacterPreview(){
+  const previewCanvas=$('previewCanvas');
+  if(!previewCanvas||!previewCanvas.getContext)return;
+  const previewCtx=previewCanvas.getContext('2d');
+  const oldCtx=ctx;
+  const saved={x:player.x,y:player.y,vy:player.vy,grounded:player.grounded,duck:player.duck,
+    chaseGap:state.chaseGap,clock:state.clock,duckUntil:state.duckUntil};
+  ctx=previewCtx;
+  try{
+    const g=ctx.createLinearGradient(0,0,0,380);
+    g.addColorStop(0,'#342746');g.addColorStop(.68,'#201b2b');g.addColorStop(1,'#17141f');
+    ctx.clearRect(0,0,900,380);ctx.fillStyle=g;ctx.fillRect(0,0,900,380);
+    ctx.strokeStyle='#9b72ff20';ctx.lineWidth=1;
+    for(let x=0;x<=900;x+=36){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,380);ctx.stroke();}
+    for(let y=0;y<=380;y+=30){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(900,y);ctx.stroke();}
+    ctx.fillStyle='#302641';ctx.fillRect(0,ground,900,80);
+    ctx.fillStyle='#9b72ff';ctx.fillRect(0,ground,900,3);
+    player.x=540;player.y=ground-player.h;player.vy=0;player.grounded=true;player.duck=false;
+    state.chaseGap=235;state.clock=14;state.duckUntil=0;
+    drawChaser();
+    drawPlayer();
+  }finally{
+    ctx=oldCtx;
+    player.x=saved.x;player.y=saved.y;player.vy=saved.vy;player.grounded=saved.grounded;player.duck=saved.duck;
+    state.chaseGap=saved.chaseGap;state.clock=saved.clock;state.duckUntil=saved.duckUntil;
+  }
+}
+function pause(){
+  if(!state.active||state.ended||state.paused)return;
+  state.paused=true;clearLoop();$('modalTitle').textContent='بازی متوقف شد';$('modalText').textContent='برای ادامه آماده‌ای؟';$('resume').style.display='inline-block';$('overlay').classList.add('show');
+}
+function resume(){
+  if(!state.active||state.ended)return;
+  state.paused=false;$('overlay').classList.remove('show');state.last=performance.now();state.raf=requestAnimationFrame(loop);
+}
+function gameOver(){
+  state.ended=true;state.active=false;clearLoop();
+  $('modalTitle').textContent='پایان بازی!';$('modalText').textContent='امتیاز نهایی: '+fa(state.score)+' — دوباره تلاش کن و رکوردت را بشکن.';
+  $('resume').style.display='none';$('overlay').classList.add('show');
+}
+$('start').addEventListener('click',showSelection);
+$('playNow').addEventListener('click',start);
+$('backSettings').addEventListener('click',()=>{selectScreen.style.display='none';home.style.display='block';});
+document.querySelectorAll('[data-player]').forEach(b=>b.addEventListener('click',()=>{$('playerChoice').value=b.dataset.player;updatePreview();}));
+document.querySelectorAll('[data-chaser]').forEach(b=>b.addEventListener('click',()=>{$('chaserChoice').value=b.dataset.chaser;updatePreview();}));
+$('menu').addEventListener('click',toMenu);
+$('pause').addEventListener('click',pause);
+$('resume').addEventListener('click',resume);
+$('restart').addEventListener('click',start);
+$('overlayMenu').addEventListener('click',toMenu);
+$('resetBest').addEventListener('click',()=>{
+  best=0;safeBestWrite();$('best').textContent=fa(0);
+  $('message') && ($('message').textContent='رکورد پاک شد.');
+});
+function jump(e){
+  if(e)e.preventDefault();
+  if(!state.active||state.paused||state.ended)return;
+  if(player.grounded && performance.now()>state.duckUntil){
+    player.vy=-15.8;player.grounded=false;player.duck=false;
+    burst(player.x+20,ground-5,10,'#b99aff');state.scoreFloat=0;
+  }
+}
+function duck(e){
+  if(e)e.preventDefault();
+  if(!state.active||state.paused||state.ended)return;
+  state.duckUntil=performance.now()+760;
+  burst(player.x+20,ground-9,7,'#bca4ff');
+}
+$('jump').addEventListener('pointerdown',jump);
+$('duck').addEventListener('pointerdown',duck);
+canvas.addEventListener('pointerdown',e=>{
+  if(e.target!==canvas)return;
+  const r=canvas.getBoundingClientRect(), y=(e.clientY-r.top)*H/r.height;
+  if(y>H*.57)jump(e);else duck(e);
+});
+document.addEventListener('keydown',e=>{
+  if(['Space','ArrowUp','ArrowDown'].includes(e.code))e.preventDefault();
+  if((e.code==='Space'||e.code==='ArrowUp')&&!e.repeat)jump(e);
+  if(e.code==='ArrowDown'&&!e.repeat)duck(e);
+  if(e.code==='Escape'||e.code==='KeyP'){if(state.active&&!state.paused)pause();else if(state.paused)resume();}
+});
+function burst(x,y,n,color,force=1){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2,sp=(1+Math.random()*4)*force;
+    state.particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1,life:22+Math.random()*24,max:46,color,r:1.5+Math.random()*4});
+  }
+}
+function makeObstacle(){
+  const overhead=Math.random()<.43;
+  if(overhead){
+    // Solid hanging wall: the lower edge is above the ground, leaving a deliberate slide tunnel.
+    const h=104+Math.random()*18;
+    state.obs.push({type:'wall',x:W+24,w:105+Math.random()*35,h,bottom:ground-38,passed:false,hit:false});
+  }else{
+    const kind=Math.random()<.5?'bag':'books';
+    const h=kind==='bag'?42+Math.random()*8:36+Math.random()*12;
+    state.obs.push({type:kind,x:W+24,w:kind==='bag'?42:48,h,passed:false,hit:false,phase:Math.random()*6});
+  }
+}
+function bg(){
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#292238');g.addColorStop(.68,'#201c2b');g.addColorStop(1,'#17141f');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // far windows and wall panels
+  for(let i=0;i<5;i++){
+    const x=((i*235-state.world*.28)%1175+1175)%1175-130;
+    ctx.fillStyle='#423655';roundRect(x,45,112,100,9);ctx.fill();
+    ctx.fillStyle='#75608e';roundRect(x+7,52,98,86,6);ctx.fill();
+    ctx.fillStyle='#352941';ctx.fillRect(x+53,52,5,86);ctx.fillRect(x+7,92,98,5);
+    ctx.fillStyle='#aa8bdf';ctx.globalAlpha=.18;ctx.fillRect(x+11,57,7,75);ctx.globalAlpha=1;
+  }
+  // subtle floating motes
+  for(let i=0;i<24;i++){
+    const x=(i*47-state.world*(.25+(i%4)*.1)+10000)%W;
+    const y=18+(i*37)%220;
+    ctx.globalAlpha=.18+.12*Math.sin(state.clock*.08+i);
+    ctx.fillStyle=i%3?'#b79aff':'#fff0ff';ctx.beginPath();ctx.arc(x,y,1.4+i%3,0,Math.PI*2);ctx.fill();
+  }ctx.globalAlpha=1;
+  // floor
+  ctx.fillStyle='#55466b';ctx.fillRect(0,ground,W,8);
+  ctx.fillStyle='#8f76b2';ctx.fillRect(0,ground,W,2);
+  for(let x=-(state.world*state.speed)%48;x<W;x+=48){
+    ctx.fillStyle='#332b41';ctx.fillRect(x,ground+12,27,5);
+    ctx.fillStyle='#6b587f';ctx.fillRect(x+5,ground+22,13,2);
+  }
+  ctx.fillStyle='#1b1723';ctx.fillRect(0,ground+30,W,H-ground-30);
+}
+function roundRect(x,y,w,h,r){
+  if(ctx.roundRect){ctx.beginPath();ctx.roundRect(x,y,w,h,r);}
+  else{ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();}
+}
+function drawWall(o){
+  const y=o.bottom-o.h;
+  // overhead wall body
+  const grad=ctx.createLinearGradient(o.x,y,o.x+o.w,y+o.h);
+  grad.addColorStop(0,'#65547c');grad.addColorStop(.45,'#382d4b');grad.addColorStop(1,'#211b2e');
+  ctx.fillStyle=grad;roundRect(o.x,y,o.w,o.h,10);ctx.fill();
+  ctx.strokeStyle='#b79aff';ctx.lineWidth=3;roundRect(o.x,y,o.w,o.h,10);ctx.stroke();
+  // panels / bolts
+  for(let k=0;k<3;k++){
+    const px=o.x+12+k*(o.w-24)/3;
+    ctx.fillStyle='#8c70b2';roundRect(px,y+12,(o.w-42)/3,o.h-24,5);ctx.fill();
+    ctx.fillStyle='#d4c3ff';ctx.beginPath();ctx.arc(px+8,y+22,2.5,0,Math.PI*2);ctx.fill();
+  }
+  // clear slide gap is visually emphasized, no solid column reaches the ground
+  ctx.fillStyle='#c6a9ff';ctx.globalAlpha=.85;
+  ctx.fillRect(o.x+9,o.bottom-2,o.w-18,3);ctx.globalAlpha=1;
+  ctx.fillStyle='#e6d9ff';ctx.font='bold 15px Tahoma';ctx.textAlign='center';ctx.fillText('سُر بخور!',o.x+o.w/2,y+o.h/2+5);
+  ctx.fillStyle='#a48bc7';ctx.fillRect(o.x+o.w*.25,o.bottom+7,o.w*.5,3);
+}
+function drawObstacle(o){
+  if(o.type==='wall'){drawWall(o);return;}
+  const y=ground-o.h;
+  if(o.type==='bag'){
+    ctx.fillStyle='#16131e';ctx.beginPath();ctx.ellipse(o.x+o.w/2,ground+3,o.w*.65,5,0,0,Math.PI*2);ctx.fill();
+    const gr=ctx.createLinearGradient(o.x,y,o.x+o.w,y+o.h);gr.addColorStop(0,'#ad91df');gr.addColorStop(1,'#5d477a');
+    ctx.fillStyle=gr;roundRect(o.x,y,o.w,o.h,8);ctx.fill();
+    ctx.strokeStyle='#d4c1ff';ctx.lineWidth=2;roundRect(o.x+4,y+4,o.w-8,o.h-8,6);ctx.stroke();
+    ctx.strokeStyle='#e5d8ff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(o.x+o.w/2,y+5,9,Math.PI,Math.PI*2);ctx.stroke();
+    ctx.fillStyle='#352641';roundRect(o.x+8,y+o.h*.55,o.w-16,12,4);ctx.fill();
+    ctx.fillStyle='#d4c1ff';ctx.fillRect(o.x+o.w/2-2,y+o.h*.55,4,12);
+  }else{
+    ctx.fillStyle='#17131e';ctx.fillRect(o.x-2,ground-3,o.w+4,5);
+    for(let k=0;k<3;k++){
+      const by=y+k*12;
+      ctx.fillStyle=['#8266ac','#a68bd0','#5f4a82'][k];roundRect(o.x+k*2,by,o.w-k*4,13,3);ctx.fill();
+      ctx.strokeStyle='#d1bdff';ctx.lineWidth=1.5;roundRect(o.x+k*2,by,o.w-k*4,13,3);ctx.stroke();
+      ctx.fillStyle='#d9c8f5';ctx.fillRect(o.x+7,by+4,o.w-14,2);
+    }
+    ctx.fillStyle='#e2d2ff';ctx.font='bold 10px Tahoma';ctx.textAlign='center';ctx.fillText('کتاب',o.x+o.w/2,y+o.h-2);
+  }
+}
+function drawNinjaCharacter(){
+  const ducking=performance.now()<state.duckUntil && player.grounded;
+  player.duck=ducking;
+  const height=ducking?39:68;
+  const bottom=player.y+player.h;
+  const x=player.x+player.w/2;
+  const bob=player.grounded&&!ducking?Math.abs(Math.sin(player.runPhase))*2:0;
+  // shadow
+  ctx.globalAlpha=.24;ctx.fillStyle='#05040a';ctx.beginPath();ctx.ellipse(x,ground+6,ducking?32:23,5,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  ctx.save();ctx.translate(x,player.y+(ducking?24:0)+bob);
+  if(ducking){
+    // low, forward ninja slide
+    ctx.rotate(-.08);
+    ctx.strokeStyle='#21182f';ctx.lineWidth=7;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(-8,12);ctx.lineTo(17,18);ctx.moveTo(-3,13);ctx.lineTo(-21,22);ctx.stroke();
+    ctx.fillStyle='#6d28d9';roundRect(-18,-2,39,23,10);ctx.fill();
+    ctx.strokeStyle='#bba2ff';ctx.lineWidth=2;roundRect(-18,-2,39,23,10);ctx.stroke();
+    ctx.fillStyle='#9b72ff';ctx.beginPath();ctx.ellipse(13,-6,14,12,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#292035';ctx.fillRect(3,-7,20,7);
+    ctx.fillStyle='#f1e9ff';ctx.fillRect(13,-5,3,3);
+    ctx.strokeStyle='#d6c5ff';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(-14,5);ctx.lineTo(-25,12);ctx.stroke();
+    // scarf
+    ctx.fillStyle='#bd9cff';ctx.beginPath();ctx.moveTo(-15,-2);ctx.lineTo(-31,-8);ctx.lineTo(-23,2);ctx.closePath();ctx.fill();
+  }else{
+    const swing=Math.sin(player.runPhase)*7;
+    // legs and arms
+    ctx.strokeStyle='#21182f';ctx.lineWidth=7;ctx.lineCap='round';ctx.beginPath();
+    ctx.moveTo(-7,30);ctx.lineTo(-11+swing,51);ctx.lineTo(-17+swing,55);
+    ctx.moveTo(7,30);ctx.lineTo(12-swing,50);ctx.lineTo(19-swing,54);
+    ctx.moveTo(-8,13);ctx.lineTo(-17-swing,27);ctx.moveTo(8,13);ctx.lineTo(17+swing,25);ctx.stroke();
+    ctx.strokeStyle='#9b72ff';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-17-swing,27);ctx.lineTo(-20-swing,31);ctx.moveTo(17+swing,25);ctx.lineTo(21+swing,28);ctx.stroke();
+    // body and belt
+    const body=ctx.createLinearGradient(-13,0,14,34);body.addColorStop(0,'#a98aff');body.addColorStop(1,'#5424a5');
+    ctx.fillStyle=body;roundRect(-13,1,26,34,8);ctx.fill();
+    ctx.strokeStyle='#cbb8ff';ctx.lineWidth=2;roundRect(-13,1,26,34,8);ctx.stroke();
+    ctx.fillStyle='#282034';ctx.fillRect(-12,25,24,5);ctx.fillStyle='#f1d9a5';ctx.fillRect(-2,25,5,5);
+    // head wrap
+    ctx.fillStyle='#a88aff';ctx.beginPath();ctx.arc(0,-8,15,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#292035';ctx.fillRect(-15,-9,30,9);
+    ctx.fillStyle='#f4efff';ctx.fillRect(3,-7,4,3);ctx.fillRect(-7,-7,4,3);
+    ctx.fillStyle='#d2bfff';ctx.fillRect(-13,-15,26,4);
+    // flowing headband
+    ctx.fillStyle='#b99aff';ctx.beginPath();ctx.moveTo(-10,-15);ctx.lineTo(-29,-20+Math.sin(player.runPhase)*2);ctx.lineTo(-21,-10);ctx.lineTo(-11,-11);ctx.closePath();ctx.fill();
+    // small backpack
+    ctx.fillStyle='#39244f';roundRect(-17,6,8,17,4);ctx.fill();
+  }
+  ctx.restore();
+  // occasional tiny trail while running
+  if(!ducking&&player.grounded&&Math.random()<.12)state.particles.push({x:player.x+3,y:ground-2,vx:-1-Math.random()*2,vy:-Math.random()*1.5,life:12,max:12,color:'#8c69d5',r:1+Math.random()*2});
+}
+function drawStudent(){
+  const ducking=performance.now()<state.duckUntil && player.grounded;
+  const x=player.x+player.w/2, bob=player.grounded&&!ducking?Math.abs(Math.sin(player.runPhase))*2:0;
+  ctx.globalAlpha=.22;ctx.fillStyle='#08060d';ctx.beginPath();ctx.ellipse(x,ground+6,ducking?31:22,5,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  ctx.save();ctx.translate(x,player.y+(ducking?25:0)+bob);
+  if(ducking){
+    ctx.fillStyle='#3f77c8';roundRect(-20,-3,40,22,8);ctx.fill();
+    ctx.fillStyle='#e8b38c';ctx.beginPath();ctx.arc(14,-7,12,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#262332';ctx.fillRect(5,-12,19,5);
+    ctx.strokeStyle='#25202e';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(-10,13);ctx.lineTo(-24,19);ctx.moveTo(3,14);ctx.lineTo(20,18);ctx.stroke();
+  }else{
+    ctx.strokeStyle='#25202e';ctx.lineWidth=7;ctx.lineCap='round';ctx.beginPath();
+    const swing=Math.sin(player.runPhase)*7;
+    ctx.moveTo(-7,30);ctx.lineTo(-11+swing,51);ctx.moveTo(7,30);ctx.lineTo(12-swing,51);
+    ctx.moveTo(-8,12);ctx.lineTo(-17-swing,27);ctx.moveTo(8,12);ctx.lineTo(17+swing,25);ctx.stroke();
+    ctx.fillStyle='#e8b38c';ctx.beginPath();ctx.arc(0,-8,15,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#382a24';ctx.beginPath();ctx.arc(0,-12,15,Math.PI,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#3f77c8';roundRect(-13,7,26,29,5);ctx.fill();
+    ctx.fillStyle='#f4f0ff';ctx.beginPath();ctx.moveTo(-7,7);ctx.lineTo(0,17);ctx.lineTo(7,7);ctx.fill();
+    ctx.fillStyle='#bd8d5b';roundRect(-17,10,8,20,3);ctx.fill();
+    ctx.fillStyle='#e8b38c';ctx.fillRect(-2,-3,3,2);ctx.fillRect(5,-3,3,2);
+    ctx.fillStyle='#24202a';roundRect(-12,53,15,6,3);ctx.fill();roundRect(5,53,15,6,3);ctx.fill();
+  }
+  ctx.restore();
+}
+function drawRobot(){
+  const ducking=performance.now()<state.duckUntil && player.grounded;
+  const x=player.x+player.w/2,bob=player.grounded&&!ducking?Math.abs(Math.sin(player.runPhase))*2:0;
+  ctx.globalAlpha=.22;ctx.fillStyle='#08060d';ctx.beginPath();ctx.ellipse(x,ground+6,ducking?31:22,5,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  ctx.save();ctx.translate(x,player.y+(ducking?25:0)+bob);
+  if(ducking){
+    ctx.fillStyle='#4b4b64';roundRect(-21,-2,42,23,8);ctx.fill();
+    ctx.strokeStyle='#b9a4ff';ctx.lineWidth=2;roundRect(-21,-2,42,23,8);ctx.stroke();
+    ctx.fillStyle='#b99aff';ctx.fillRect(0,3,13,4);
+  }else{
+    const metal=ctx.createLinearGradient(-14,0,14,0);metal.addColorStop(0,'#64627c');metal.addColorStop(.5,'#d0c9e8');metal.addColorStop(1,'#57536d');
+    ctx.strokeStyle='#8f83b4';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(-7,32);ctx.lineTo(-11,52);ctx.moveTo(7,32);ctx.lineTo(11,52);ctx.stroke();
+    ctx.fillStyle='#272333';roundRect(-17,51,14,7,3);ctx.fill();roundRect(4,51,14,7,3);ctx.fill();
+    ctx.fillStyle=metal;roundRect(-14,2,28,34,7);ctx.fill();ctx.strokeStyle='#cbbaff';ctx.lineWidth=2;roundRect(-14,2,28,34,7);ctx.stroke();
+    ctx.fillStyle='#30283f';roundRect(-16,-17,32,28,8);ctx.fill();ctx.strokeStyle='#b99aff';ctx.lineWidth=2;roundRect(-16,-17,32,28,8);ctx.stroke();
+    ctx.fillStyle='#a98aff';ctx.fillRect(-9,-7,6,4);ctx.fillRect(3,-7,6,4);
+    ctx.fillStyle='#dfd3ff';ctx.fillRect(-7,18,14,3);
+    ctx.strokeStyle='#b99aff';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(-12,11);ctx.lineTo(-20,24);ctx.moveTo(12,11);ctx.lineTo(20,23);ctx.stroke();
+    ctx.fillStyle='#8f76c8';ctx.beginPath();ctx.arc(0,-21,4,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
+function drawPlayer(){
+  const choice=$('playerChoice').value;
+  if(choice==='student')drawStudent();
+  else if(choice==='robot')drawRobot();
+  else drawNinjaCharacter();
+}
+function drawEbrahimi(){
+  // Ebrahimi skin: bald head, blue face mask, dark suit and white shirt.
+  const x=player.x-state.chaseGap, y=ground-66;
+  if(x < -75) return;
+  const bob=Math.sin(state.clock*.22)*1.8;
+  ctx.save();ctx.translate(x,y+bob);
+  // ground shadow
+  ctx.globalAlpha=.24;ctx.fillStyle='#08060d';ctx.beginPath();ctx.ellipse(23,68,27,5,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  // legs and shoes
+  ctx.strokeStyle='#17151d';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();
+  ctx.moveTo(17,45);ctx.lineTo(12+Math.sin(state.clock*.2)*4,61);
+  ctx.moveTo(31,45);ctx.lineTo(37-Math.sin(state.clock*.2)*4,61);ctx.stroke();
+  ctx.fillStyle='#0f0d14';roundRect(4,58,18,7,3);ctx.fill();roundRect(29,58,18,7,3);ctx.fill();
+  // suit body
+  const suit=ctx.createLinearGradient(7,18,42,52);suit.addColorStop(0,'#34313e');suit.addColorStop(1,'#111019');
+  ctx.fillStyle=suit;ctx.beginPath();ctx.moveTo(12,17);ctx.lineTo(34,17);ctx.lineTo(45,47);ctx.lineTo(7,47);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#5b5668';ctx.lineWidth=1.5;ctx.stroke();
+  // white shirt and tie
+  ctx.fillStyle='#eeeaf1';ctx.beginPath();ctx.moveTo(19,17);ctx.lineTo(28,17);ctx.lineTo(32,42);ctx.lineTo(23,38);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#5d3c80';ctx.beginPath();ctx.moveTo(22,18);ctx.lineTo(26,18);ctx.lineTo(28,36);ctx.lineTo(24,40);ctx.lineTo(21,36);ctx.closePath();ctx.fill();
+  // arm reaching forward in pursuit
+  ctx.strokeStyle='#292632';ctx.lineWidth=7;ctx.beginPath();ctx.moveTo(33,24);ctx.lineTo(45,32);ctx.lineTo(54,28);ctx.stroke();
+  ctx.fillStyle='#d9a989';ctx.beginPath();ctx.ellipse(55,28,6,4,-.25,0,Math.PI*2);ctx.fill();
+  // neck and face
+  ctx.fillStyle='#d9aa8a';roundRect(20,10,10,10,3);ctx.fill();
+  ctx.fillStyle='#d8a687';ctx.beginPath();ctx.ellipse(25,0,15,18,0,0,Math.PI*2);ctx.fill();
+  // ears
+  ctx.fillStyle='#c99578';ctx.beginPath();ctx.arc(10,1,3.5,0,Math.PI*2);ctx.fill();
+  // Bald scalp with a subtle highlight (no hair).
+  ctx.fillStyle='#e3b99d';ctx.beginPath();ctx.ellipse(25,-9,13.5,8,0,Math.PI,Math.PI*2);ctx.fill();
+  ctx.strokeStyle='#f1d0b7';ctx.lineWidth=1.4;ctx.beginPath();ctx.arc(22,-11,7,Math.PI*1.1,Math.PI*1.75);ctx.stroke();
+  // Eyes and brows remain visible above the blue mask.
+  ctx.strokeStyle='#49352f';ctx.lineWidth=1.8;ctx.beginPath();ctx.moveTo(14,-5);ctx.lineTo(22,-6);ctx.moveTo(27,-6);ctx.lineTo(35,-5);ctx.stroke();
+  ctx.fillStyle='#29202b';ctx.beginPath();ctx.ellipse(19,-2,1.5,1.8,0,0,Math.PI*2);ctx.ellipse(31,-2,1.5,1.8,0,0,Math.PI*2);ctx.fill();
+  // Blue mask covering nose and mouth.
+  ctx.fillStyle='#168de0';ctx.beginPath();ctx.moveTo(13,1);ctx.quadraticCurveTo(25,5,37,1);ctx.lineTo(34,11);ctx.quadraticCurveTo(25,16,16,11);ctx.closePath();ctx.fill();
+  ctx.strokeStyle='#7bd0ff';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(15,4);ctx.lineTo(35,4);ctx.moveTo(17,8);ctx.lineTo(33,8);ctx.stroke();
+  ctx.strokeStyle='#168de0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(14,3);ctx.lineTo(9,1);ctx.moveTo(36,3);ctx.lineTo(41,1);ctx.stroke();
+  // small name tag
+  ctx.fillStyle='#bca0ef';roundRect(11,27,9,5,1);ctx.fill();
+  ctx.restore();
+}
+function drawTrump(){
+  const x=player.x-state.chaseGap,y=ground-66;
+  if(x < -75)return;
+  ctx.save();ctx.translate(x,y+Math.sin(state.clock*.22)*1.8);
+  ctx.globalAlpha=.22;ctx.fillStyle='#08060d';ctx.beginPath();ctx.ellipse(24,68,27,5,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  ctx.strokeStyle='#19151c';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(17,45);ctx.lineTo(13,61);ctx.moveTo(31,45);ctx.lineTo(37,61);ctx.stroke();
+  ctx.fillStyle='#101018';roundRect(4,58,18,7,3);ctx.fill();roundRect(29,58,18,7,3);ctx.fill();
+  ctx.fillStyle='#202b49';ctx.beginPath();ctx.moveTo(11,18);ctx.lineTo(35,18);ctx.lineTo(45,47);ctx.lineTo(6,47);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#f6f2eb';ctx.beginPath();ctx.moveTo(19,17);ctx.lineTo(28,17);ctx.lineTo(33,42);ctx.lineTo(22,39);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#c52c42';ctx.beginPath();ctx.moveTo(22,18);ctx.lineTo(27,18);ctx.lineTo(29,40);ctx.lineTo(24,44);ctx.lineTo(21,39);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#e6b68f';ctx.beginPath();ctx.ellipse(25,0,15,18,0,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e8b13d';ctx.beginPath();ctx.moveTo(9,-4);ctx.quadraticCurveTo(6,-20,23,-18);ctx.quadraticCurveTo(40,-19,40,-4);ctx.lineTo(34,-8);ctx.lineTo(17,-7);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#d8a02f';ctx.beginPath();ctx.moveTo(12,-9);ctx.lineTo(0,-14);ctx.lineTo(14,-13);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fff';ctx.fillRect(15,-3,8,5);ctx.fillRect(27,-3,8,5);ctx.fillStyle='#2b2530';ctx.fillRect(19,-2,3,3);ctx.fillRect(30,-2,3,3);
+  ctx.fillStyle='#b87f61';ctx.beginPath();ctx.ellipse(25,8,6,2,0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+function drawPezeshkian(){
+  const x=player.x-state.chaseGap,y=ground-66;
+  if(x < -75)return;
+  ctx.save();ctx.translate(x,y+Math.sin(state.clock*.22)*1.8);
+  ctx.globalAlpha=.22;ctx.fillStyle='#08060d';ctx.beginPath();ctx.ellipse(24,68,27,5,0,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  ctx.strokeStyle='#17151d';ctx.lineWidth=8;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(17,45);ctx.lineTo(13,61);ctx.moveTo(31,45);ctx.lineTo(37,61);ctx.stroke();
+  ctx.fillStyle='#0f0d14';roundRect(4,58,18,7,3);ctx.fill();roundRect(29,58,18,7,3);ctx.fill();
+  ctx.fillStyle='#33313b';ctx.beginPath();ctx.moveTo(12,18);ctx.lineTo(35,18);ctx.lineTo(45,47);ctx.lineTo(7,47);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#eeeaf1';ctx.beginPath();ctx.moveTo(19,17);ctx.lineTo(28,17);ctx.lineTo(32,42);ctx.lineTo(23,39);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#d7a78b';ctx.beginPath();ctx.ellipse(25,0,15,18,0,0,Math.PI*2);ctx.fill();
+  // salt-and-pepper hair and distinctive grey beard
+  ctx.fillStyle='#d1d0ce';ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(10,-8);ctx.quadraticCurveTo(14,-18,27,-16);ctx.quadraticCurveTo(39,-15,40,-3);ctx.lineTo(35,-8);ctx.lineTo(17,-7);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#4d4b4b';ctx.beginPath();ctx.moveTo(12,5);ctx.quadraticCurveTo(12,18,25,20);ctx.quadraticCurveTo(38,16,38,4);ctx.lineTo(33,7);ctx.lineTo(29,13);ctx.lineTo(20,13);ctx.lineTo(16,7);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fff';ctx.fillRect(15,-3,8,4);ctx.fillRect(27,-3,8,4);ctx.fillStyle='#27222a';ctx.fillRect(19,-2,3,3);ctx.fillRect(30,-2,3,3);
+  ctx.fillStyle='#b89a7d';ctx.beginPath();ctx.ellipse(25,5,5,2,0,0,Math.PI*2);ctx.fill();
+  ctx.restore();
+}
+function drawChaser(){
+  const choice=$('chaserChoice').value;
+  if(choice==='trump')drawTrump();
+  else if(choice==='pezeshkian')drawPezeshkian();
+  else drawEbrahimi();
+}
+function collision(o){
+  const ducking=performance.now()<state.duckUntil && player.grounded;
+  // Character hitbox follows actual stance, slightly inset from drawn edges.
+  const px=player.x+7,pw=player.w-13;
+  const ph=ducking?34:player.h-7;
+  const top=player.y+(player.h-ph),bottom=player.y+player.h-3;
+  if(o.type==='wall'){
+    const wallTop=o.bottom-o.h, wallBottom=o.bottom;
+    // Only solid part of the overhead wall is hazardous; the gap below is genuinely clear.
+    const ox=o.x+5,ow=o.w-10;
+    return px<ox+ow && px+pw>ox && top<wallBottom && bottom>wallTop && !ducking;
+  }
+  const ox=o.x+5,ow=o.w-10,ot=ground-o.h+4;
+  return px<ox+ow && px+pw>ox && bottom>ot && top<ground;
+}
+function gameOverCaught(){
+  state.ended=true;state.active=false;clearLoop();
+  const chaser=$('chaserChoice').value;
+  const endings={
+    ebrahimi:{title:'آقای ابراهیمی گرفتت! 😅',text:'«کجا با این عجله؟!» ابراهیمی بالاخره رسید. امتیاز نهایی: '+fa(state.score)+' — دوباره فرار کن!'},
+    trump:{title:'ترامپ بهت رسید! 🇺🇸',text:'«You are caught!» ترامپ جلوی راهت را گرفت. امتیاز نهایی: '+fa(state.score)+' — دوباره تلاش کن!'},
+    pezeshkian:{title:'پزشکیان گرفتت! 🇮🇷',text:'«خب، این دفعه نشد فرار کنی!» پزشکیان بهت رسید. امتیاز نهایی: '+fa(state.score)+' — یک بار دیگر امتحان کن!'}
+  };
+  const ending=endings[chaser]||endings.ebrahimi;
+  $('modalTitle').textContent=ending.title;
+  $('modalText').textContent=ending.text;
+  $('resume').style.display='none';$('overlay').classList.add('show');
+}
+function hurt(){
+  if(state.invuln>0||state.hitLock>0)return;
+  state.lives--;state.chaseGap=Math.max(38,state.chaseGap-24);state.hitLock=32;state.invuln=65;state.shake=15;state.flash=1;
+  $('life').textContent=fa(state.lives);
+  $('message').textContent=state.lives>0?'برخورد کردی! یک جان کم شد 💥':'آخرین جانت را از دست دادی!';
+  burst(player.x+20,player.y+28,30,'#ff5478',1.25);burst(player.x+20,player.y+28,18,'#d5baff',1.1);
+  $('hurtFlash').style.transition='none';$('hurtFlash').style.opacity='1';
+  setTimeout(()=>{$('hurtFlash').style.transition='opacity .38s ease';$('hurtFlash').style.opacity='0';},40);
+  if(state.lives<=0)gameOver();
+}
+function update(dt,now){
+  state.clock+=dt;state.world+=state.speed*dt;state.hitLock=Math.max(0,state.hitLock-dt);
+  state.invuln=Math.max(0,state.invuln-dt);state.shake=Math.max(0,state.shake-dt*1.2);
+  state.flash=Math.max(0,state.flash-dt*.07);
+  player.runPhase+=dt*.24;
+  const ducking=now<state.duckUntil&&player.grounded;
+  if(!ducking){player.vy+=.78*dt;player.y+=player.vy*dt;if(player.y>=ground-player.h){if(!player.grounded&&player.vy>3){player.landSquash=5;burst(player.x+20,ground-2,8,'#9b72ff',.6);}player.y=ground-player.h;player.vy=0;player.grounded=true;}}
+  else {player.y=ground-player.h;}
+  player.landSquash=Math.max(0,player.landSquash-dt);
+  // Gradual difficulty: speed increases by score bands and is capped for playability.
+  const targetLevel=1+Math.floor(state.score/100);
+  if(targetLevel!==state.level){state.level=targetLevel;$('level').textContent=fa(state.level);$('message').textContent='سطح '+fa(state.level)+' — سرعت بیشتر شد!';burst(450,105,20,'#b79aff');}
+  state.speed=Math.min(state.baseSpeed+(state.level-1)*.38,10.8);
+  // The pursuer does not advance passively; it only closes in when the player is hit.
+  $('gap').textContent=fa(Math.max(0,Math.round(state.chaseGap/1.9)))+'٪';
+  if(state.chaseGap<=38){state.chaseGap=38;gameOverCaught();return;}
+  state.spawn-=dt;
+  if(state.spawn<=0){
+    makeObstacle();
+    const minGap=Math.max(38,73-(state.level-1)*2.2);
+    state.spawn=minGap+Math.random()*31;
+  }
+  for(let i=state.obs.length-1;i>=0;i--){
+    const o=state.obs[i];o.x-=state.speed*dt;drawObstacle(o);
+    if(!o.passed&&o.x+o.w<player.x){o.passed=true;state.score+=10;$('score').textContent=fa(state.score);
+      if(state.score>best){best=state.score;$('best').textContent=fa(best);safeBestWrite();}
+      if(state.score%50===0){burst(450,100,18,'#c3a7ff');state.scoreFloat=16;}
+    }
+    if(!o.hit&&collision(o)){o.hit=true;state.obs.splice(i,1);hurt();}
+    else if(o.x+o.w<0)state.obs.splice(i,1);
+    if(!state.active)break;
+  }
+  for(let i=state.particles.length-1;i>=0;i--){
+    const p=state.particles[i];p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=.13*dt;p.vx*=.99;p.life-=dt;
+    if(p.life<=0)state.particles.splice(i,1);
+  }
+}
+function drawParticles(){
+  for(const p of state.particles){ctx.globalAlpha=Math.max(0,Math.min(1,p.life/p.max));ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1;
+}
+function loop(now){
+  state.raf=0;
+  if(!state.active||state.paused||state.ended)return;
+  const dt=Math.min(Math.max((now-state.last)/16.667,0),2.2);state.last=now;
+  // render scene with real camera shake on damage
+  ctx.save();
+  if(state.shake>0){ctx.translate((Math.random()-.5)*state.shake,(Math.random()-.5)*state.shake*.6);}
+  bg();
+  update(dt,now);
+  if(state.active){drawChaser();drawPlayer();drawParticles();}
+  if(state.flash>0){ctx.fillStyle='rgba(255,65,110,'+(state.flash*.17)+')';ctx.fillRect(0,0,W,H);}
+  ctx.restore();
+  if(state.active&&!state.paused&&!state.ended)state.raf=requestAnimationFrame(loop);
+}
+bg();drawChaser();drawPlayer();
+})();
+</script>
+</body>
+</html>
